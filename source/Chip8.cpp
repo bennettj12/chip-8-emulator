@@ -104,6 +104,27 @@ public:
         memset(video, 0, sizeof(video));
     }
 
+    void Chip8::OP_00EE() {
+        // ret | return
+        --sp;
+        pc = stack[sp];
+        
+    }
+
+    void Chip8::OP_1nnn() {
+        // jmp | jump to location
+        uint16_t address = opcode & 0x0FFFu;
+        pc = address;
+    }
+
+    void Chip8::OP_2nnn() {
+        // call subroutine at nnn
+        uint16_t address = opcode & 0x0FFFu;
+
+        stack[sp] = pc;
+        ++sp;
+        
+    }
 
 
 };

@@ -350,4 +350,66 @@ public:
         registers[0xF] = (registers[Vx] & 0x80u) >> 7u;
         registers[Vx] <<= 1;
     }
+    void Chip8::OP_9xy0() {
+        //skip next instruction if register Vx != Vy
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+        uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+        if(registers[Vx] != registers[Vy]){
+            pc += 2;
+        }
+    }
+    void Chip8::OP_Annn() {
+        // set index to nnn
+        uint16_t address = (opcode & 0x0FFFu);
+        index = address;
+    }
+    void Chip8::OP_Bnnn() {
+        // jump to location at V0 + nnn;
+        uint16_t address = (opcode & 0x0FFFu);
+
+        pc = address + registers[0];
+    }
+    void Chip8::OP_Cxkk() {
+        // set register Vx to a random byte AND a given byte
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	    uint8_t byte = opcode & 0x00FFu;
+
+        registers[Vx] = randByte(randGen) & byte;
+    }
+    void Chip8::OP_Dxyn() {
+        // draw n-byte sprite starting at memory location index at (Vx,Vy), set VF = collision
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+        uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+        uint8_t height = opcode & 0x000Fu;
+
+        uint8_t xPos = registers[Vx] % VIDEO_WIDTH;
+        uint8_t yPos = registers[Vx] % VIDEO_HEIGHT;
+
+        registers[0xF] = 0;
+
+        for(unsigned int row = 0; row < height; ++row) {
+            uint8_t spriteByte = memory[index + row];
+
+            for(unsigned int col = 0; col < 8; ++col){
+
+                uint8_t spritePixel = spriteByte & (0x80u >> col);
+                uint32_t* screenPixel = &video[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
+
+                if(spritePixel){
+                    // when the sprite pixel should be on, check if that pixel is already turned on in video.
+                    if (*screenPixel == 0xFFFFFFFF){
+                        // pixel is already on, collision flag set
+                        registers[0xF] = 1;
+                    }
+                    // set the pixel to the XOR of itself, effectively toggling it
+                    *screenPixel ^= 0xFFFFFFFF;
+                }
+
+            }
+
+        }
+
+
+
+    }
 };

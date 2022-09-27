@@ -408,8 +408,63 @@ public:
             }
 
         }
+    }
 
+    void Chip8::OP_Ex9E() {
+        // skip next instruction if key value Vx is pressed.
 
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	    uint8_t key = registers[Vx];
+
+        if(keypad[key]) {
+            pc+= 2;
+        }
 
     }
+
+    void Chip8::ExA1() {
+        // skip next instruction if key Vx is not pressed
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	    uint8_t key = registers[Vx];
+        if(!keypad[key]) {
+            pc+= 2;
+        }
+    }
+
+    void Chip8::Fx07() {
+        // set Vx to the current delay timer value
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+        registers[Vx] = delayTimer;
+
+    }
+
+    void Chip8::Fx0A() {
+        // wait for a key press, store the value of the key in vx
+	    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+        for(unsigned int i = 0; i < 16; i++) {
+            if(keypad[i]){
+                registers[Vx] = i;
+                return;
+            }
+        }
+        pc -= 2;
+    }
+
+    void Chip8::Fx15() {
+        // set delay timer to Vx
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+        delayTimer = registers[Vx];
+    }
+
+    void Chip8::Fx18() {
+        // set sound timer to Vx
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+        soundTimer = registers[Vx];
+    }
+
+
 };

@@ -422,7 +422,7 @@ public:
 
     }
 
-    void Chip8::ExA1() {
+    void Chip8::OP_ExA1() {
         // skip next instruction if key Vx is not pressed
         uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 	    uint8_t key = registers[Vx];
@@ -431,7 +431,7 @@ public:
         }
     }
 
-    void Chip8::Fx07() {
+    void Chip8::OP_Fx07() {
         // set Vx to the current delay timer value
         uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
@@ -439,7 +439,7 @@ public:
 
     }
 
-    void Chip8::Fx0A() {
+    void Chip8::OP_Fx0A() {
         // wait for a key press, store the value of the key in vx
 	    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
@@ -452,18 +452,65 @@ public:
         pc -= 2;
     }
 
-    void Chip8::Fx15() {
+    void Chip8::OP_Fx15() {
         // set delay timer to Vx
         uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
         delayTimer = registers[Vx];
     }
 
-    void Chip8::Fx18() {
+    void Chip8::OP_Fx18() {
         // set sound timer to Vx
         uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
         soundTimer = registers[Vx];
+    }
+
+    void Chip8::OP_Fx1E() {
+        // Increase Index by Vx
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+        index += registers[Vx];
+
+    }
+
+    void Chip8::OP_Fx29() {
+        //Sets the index to the beginning of character requested in vx
+
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+        uint8_t digit = registers[Vx];
+
+        index = FONTSET_START_ADDRESS + (5 * digit);
+    }
+
+    void Chip8::OP_Fx33() {
+        // Stores BCD (Binary Coded Decimal) representation of Vx at i, i+1, i+2
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+        uint8_t number = registers[Vx];
+        
+        memory[index + 2] = number % 10;
+        number /= 10;
+
+        memory[index + 1] = number % 10;
+        number /= 10;
+
+        memory[index] = number % 10;
+    }
+
+    void Chip8::OP_Fx55() {
+        // store registers v0 to vx into memory starting at index.
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+        for(unsigned int i = 0; i <= Vx; ++i) {
+            memory[index + i] = registers[i];
+        }
+
+    }
+
+    void Chip8::OP_Fx65() {
+        // reads memory into registers v0 to vx starting at index.
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+        for(unsigned int i = 0; i <= Vx; ++i) {
+            registers[i] = memory[index + i];
+        }
     }
 
 

@@ -1,29 +1,13 @@
+#include "Chip8.hpp"
 #include <cstdint>
 #include <fstream>
 #include <chrono>
 #include <random>
-
-class Chip8 {
-
-public:
-    uint8_t registers[16]{};
-    uint8_t memory[4096]{};
-    uint16_t index{};
-    uint16_t pc{};
-    uint16_t stack[16]{};
-    uint8_t sp{};
-    uint8_t delayTimer{};
-    uint8_t soundTimer{};
-    uint8_t keypad[16]{};
-    uint32_t video[64 * 32]{};
-    uint16_t opcode;
-
-    std::default_random_engine randGen;
-    std::uniform_int_distribution<uint8_t> randByte;
+#include <cstring>
 
     const unsigned int START_ADDRESS = 0x200;
     const unsigned int FONTSET_START_ADDRESS = 0x50;
-    static const unsigned int FONTSET_SIZE = 80;
+    const unsigned int FONTSET_SIZE = 80;
     
     uint8_t fontset[FONTSET_SIZE] = 
     {
@@ -52,13 +36,6 @@ public:
         0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
-
-    typedef void (Chip8::*Chip8Func)();
-    Chip8Func table[0xF + 1];
-    Chip8Func table0[0xE + 1];
-    Chip8Func table8[0xE + 1];
-    Chip8Func tableE[0xE + 1];
-    Chip8Func tableF[0x65 + 1];
 
 
 
@@ -140,19 +117,19 @@ public:
 		tableF[0x65] = &Chip8::OP_Fx65;
 
     }
-    void Table0(){
+    void Chip8::Table0(){
 		((*this).*(table0[opcode & 0x000Fu]))();
 	}
-	void Table8(){
+	void Chip8::Table8(){
 		((*this).*(table8[opcode & 0x000Fu]))();
 	}
-	void TableE(){
+	void Chip8::TableE(){
 		((*this).*(tableE[opcode & 0x000Fu]))();
 	}
-	void TableF(){
+	void Chip8::TableF(){
 		((*this).*(tableF[opcode & 0x00FFu]))();
 	}
-	void OP_NULL(){}
+	void Chip8::OP_NULL(){}
 
     void Chip8::Cycle()
     {
@@ -514,4 +491,4 @@ public:
     }
 
 
-};
+

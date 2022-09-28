@@ -36,8 +36,8 @@ int main(int argc, char** argv) {
 
         if (dt > cycleDelay) {
 			lastCycleTime = currentTime;
-
-			chip8.Cycle();
+            chip8.Cycle();
+            
 
 			platform.Update(chip8.video, videoPitch);
 		}

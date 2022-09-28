@@ -4,6 +4,7 @@
 #include <chrono>
 #include <random>
 #include <cstring>
+#include <iostream>
 
     const unsigned int START_ADDRESS = 0x200;
     const unsigned int FONTSET_START_ADDRESS = 0x50;
@@ -129,16 +130,23 @@
 	void Chip8::TableF(){
 		((*this).*(tableF[opcode & 0x00FFu]))();
 	}
-	void Chip8::OP_NULL(){}
+	void Chip8::OP_NULL(){
+        std::cout << "NULL OPCODE CALLED, WHY?" << std::endl;
+        std::cout << "OPCODE: " << std::hex << opcode << std::endl;
+    }
 
     void Chip8::Cycle()
     {
+        // if(opcode == 0xd1afu)
+        // {
+        //     return;
+        // }
         // fetch decode execute cycle
 
-        // fetch current opcode (bitshift 8 to set leftmost 8 bits to current opcode), rightmost 8 bits to next
+        // fetch current opcode (opcodes are 16bit, memory is 1byte per cell)
         opcode = (memory[pc] << 8u | memory[pc + 1]);
-
         pc+=2;
+
         // decode + execute
         // call function at first digit table
         ((*this).*(table[(opcode & 0xF000u) >> 12u]))();
@@ -179,6 +187,9 @@
                 memory[START_ADDRESS + i] = buffer[i];
 
             }
+
+            delete[] buffer;
+
         }
 
     }
@@ -217,7 +228,7 @@
         uint8_t Vx = (opcode & 0x0F00u) >> 8u;
         uint8_t byte = opcode & 0x00FFu;
 
-        if(registers[Vx] = byte){
+        if(registers[Vx] == byte){
             pc += 2;
         }
     }
@@ -296,7 +307,7 @@
 
         registers[0xF] = (registers[Vx] > registers[Vy]) ? 1 : 0;
 
-        registers[Vx] -= registers[Vy];
+        registers[Vx] = registers[Vx] - registers[Vy];
 
     }
 
@@ -360,7 +371,7 @@
         uint8_t height = opcode & 0x000Fu;
 
         uint8_t xPos = registers[Vx] % VIDEO_WIDTH;
-        uint8_t yPos = registers[Vx] % VIDEO_HEIGHT;
+        uint8_t yPos = registers[Vy] % VIDEO_HEIGHT;
 
         registers[0xF] = 0;
 
@@ -417,16 +428,59 @@
     }
 
     void Chip8::OP_Fx0A() {
-        // wait for a key press, store the value of the key in vx
-	    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
-
-        for(unsigned int i = 0; i < 16; i++) {
-            if(keypad[i]){
-                registers[Vx] = i;
-                return;
-            }
+        uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+        if (keypad[0]){
+            registers[Vx] = 0;
         }
-        pc -= 2;
+        else if (keypad[1]){
+            registers[Vx] = 1;
+        }
+        else if (keypad[2]){
+            registers[Vx] = 2;
+        }
+        else if (keypad[3]){
+            registers[Vx] = 3;
+        }
+        else if (keypad[4]){
+            registers[Vx] = 4;
+        }
+        else if (keypad[5]){
+            registers[Vx] = 5;
+        }
+        else if (keypad[6]){
+            registers[Vx] = 6;
+        }
+        else if (keypad[7]){
+            registers[Vx] = 7;
+        }
+        else if (keypad[8]){
+            registers[Vx] = 8;
+        }
+        else if (keypad[9]){
+            registers[Vx] = 9;
+        }
+        else if (keypad[10]){
+            registers[Vx] = 10;
+        }
+        else if (keypad[11]){
+            registers[Vx] = 11;
+        }
+        else if (keypad[12]){
+            registers[Vx] = 12;
+        }
+        else if (keypad[13]){
+            registers[Vx] = 13;
+        }
+        else if (keypad[14]){
+            registers[Vx] = 14;
+        }
+        else if (keypad[15]){
+            registers[Vx] = 15;
+        }
+        else{
+            pc -= 2;
+        }
+
     }
 
     void Chip8::OP_Fx15() {
@@ -476,7 +530,7 @@
     void Chip8::OP_Fx55() {
         // store registers v0 to vx into memory starting at index.
         uint8_t Vx = (opcode & 0x0F00u) >> 8u;
-        for(unsigned int i = 0; i <= Vx; ++i) {
+        for(uint8_t i = 0; i <= Vx; ++i) {
             memory[index + i] = registers[i];
         }
 
@@ -485,7 +539,7 @@
     void Chip8::OP_Fx65() {
         // reads memory into registers v0 to vx starting at index.
         uint8_t Vx = (opcode & 0x0F00u) >> 8u;
-        for(unsigned int i = 0; i <= Vx; ++i) {
+        for(uint8_t i = 0; i <= Vx; ++i) {
             registers[i] = memory[index + i];
         }
     }

@@ -145,6 +145,7 @@
 
         // fetch current opcode (opcodes are 16bit, memory is 1byte per cell)
         opcode = (memory[pc] << 8u | memory[pc + 1]);
+
         pc+=2;
 
         // decode + execute
